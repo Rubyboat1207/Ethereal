@@ -1,5 +1,6 @@
 #include <dirent.h>
 #include <stdio.h>
+#include <term.h>
 // #include <kernel/gfx/term.h>
 
 typedef struct UserConfig {
@@ -19,13 +20,16 @@ int main(int argc, char **argv) {
     // DIR *dirp = opendir(path);
 
     getcwd(cwd, sizeof(cwd));
+    int terminal_width = term_interface_getWidth();
+    printf("Terminal width: %d\n", terminal_width);
+    term_interface_clear();
 
     char* hello_msg = " Welcome to RBShell! ";
-    int terminal_width = 64;
+    int message_length = 22;
 
-    for(int i = 0; i < terminal_width - (int) sizeof(&hello_msg); i++) {
+    for(int i = 0; i < terminal_width - message_length; i++) {
         printf("-");
-        if(i == terminal_width / 2 - (int) sizeof(&hello_msg) / 2) {
+        if(i == terminal_width / 2 - message_length / 2) {
             printf("%s", hello_msg);
         }
     }
