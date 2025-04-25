@@ -8,7 +8,7 @@ OUT_OBJ_LIBC = $(OUT_OBJ)/libc
 OUT_OBJ_LIBK = $(OUT_OBJ)/libk
 
 # SOURCE DIRECTORIES
-SOURCE_DIRECTORIES = stdlib stdio string time net
+SOURCE_DIRECTORIES = stdlib stdio string time net term
 LIBC_SOURCE_DIRECTORIES = $(SOURCE_DIRECTORIES) errno unistd libc dirent
 LIBK_SOURCE_DIRECTORIES = $(SOURCE_DIRECTORIES)
 

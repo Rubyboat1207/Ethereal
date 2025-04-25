@@ -19,6 +19,7 @@
 #include <kernel/drivers/font.h>
 #include <errno.h>
 #include <stdint.h>
+#include <kernel/gfx/interface/term.h>
 
 /**** DEFINITIONS ****/
 
@@ -86,5 +87,11 @@ int terminal_getWidth();
  * @brief Get the current height of the terminal
  */
 int terminal_getHeight();
+
+ssize_t term_userInterface_read(fs_node_t *node, off_t offset, size_t size, uint8_t *buffer);
+
+ssize_t term_userInterface_write(fs_node_t *node, off_t offset, size_t size, uint8_t *buffer);
+
+void terminal_init_vfs();
 
 #endif

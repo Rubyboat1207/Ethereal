@@ -16,6 +16,7 @@
 #include <kernel/gfx/gfx.h>
 #include <stddef.h>
 #include <string.h>
+#include <kernel/mem/alloc.h>
 
 /* GCC */
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
@@ -52,7 +53,7 @@ int terminal_init(color_t fg, color_t bg) {
     if (!fontHeight || !fontWidth) return -EINVAL; // No font loaded
 
     // Setup terminal variables
-    terminal_width = driver->screenWidth / fontWidth;
+    terminal_width = driver->screenWidth / (fontWidth + 1);
     terminal_height = driver->screenHeight / fontHeight;
     terminal_fg = fg;
     terminal_bg = bg;
@@ -65,6 +66,18 @@ int terminal_init(color_t fg, color_t bg) {
 
     // Done!
     return 0;
+}
+
+void terminal_init_vfs() {
+    fs_node_t *term_interface = kmalloc(sizeof(fs_node_t));
+    memset(term_interface, 0, sizeof(fs_node_t));
+
+    strncpy(term_interface->name, "term", 256);
+    term_interface->read = term_userInterface_read;
+    term_interface->write = term_userInterface_write;
+    term_interface->flags = VFS_CHARDEVICE;
+
+    vfs_mount(term_interface, TERM_USERINTERFACE_MOUNT_PATH);
 }
 
 /**
@@ -333,4 +346,45 @@ int terminal_getWidth() {
  */
 int terminal_getHeight() {
     return terminal_height;
+}
+
+uint8_t userInterfaceSelectedFunction;
+
+ssize_t term_userInterface_read(fs_node_t *node, off_t offset, size_t size, uint8_t *buffer) {
+    switch(userInterfaceSelectedFunction) {
+        case(TERM_USERINTERFACE_GETWIDTH): {
+            if(size < sizeof(int)) {
+                return size;
+            }
+            int width = terminal_getWidth();
+
+            memcpy(buffer, &width, sizeof(int));
+            return size;
+        }
+        case(TERM_USERINTERFACE_GETHEIGHT): {
+            if(size < sizeof(int)) {
+                return size;
+            }
+
+            int height = terminal_getHeight();
+
+            memcpy(buffer, &height, sizeof(int));
+            return size;
+        }
+        case(TERM_USERINTERFACE_CLEAR): {
+            terminal_clear(TERMINAL_DEFAULT_FG, TERMINAL_DEFAULT_BG);
+            video_updateScreen();
+            return size;
+        }
+    }
+    return size;
+}
+
+ssize_t term_userInterface_write(fs_node_t *node, off_t offset, size_t size, uint8_t *buffer) {
+    if(size != 1) {
+        return size;
+    }
+    userInterfaceSelectedFunction = buffer[0];
+
+    return size;
 }

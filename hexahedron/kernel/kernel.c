@@ -173,6 +173,7 @@ void kmain() {
     // Startup the builtin filesystem drivers    
     tarfs_init();
     nulldev_init();
+    terminal_init_vfs();
     zerodev_init();
     debug_mountNode();
     periphfs_init();
